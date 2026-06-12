@@ -1,8 +1,8 @@
 # 游戏原始数据（体积大，不需要上传）
 rocom.aoe.top-main/
 
-# 脚本中间产物（JSON 缓存，可从原始数据重新生成）
-src/
+# 脚本中间产物（JSON 缓存，可从原始数据重新生成）——只忽略仓库根目录的 src/
+/src/
 
 # 旧版生成文件
 Rocom_wiki.ver.*.html
