@@ -1,6 +1,6 @@
 {
-  "versionCode": 7,
-  "versionName": "2.5",
-  "apkUrl": "https://qiuh0330.github.io/rocowiki/gdtools-v2.5.apk",
-  "changelog": "v2.5\n- 检查更新支持应用内下载安装\n- 启动时自动检查新版本\n- 收集情况只显示可孵化的最终形态（排除首领）\n- 修复从精灵详情返回后列表回到顶部的问题"
+  "versionCode": 8,
+  "versionName": "2.6",
+  "apkUrl": "https://github.com/qiuh0330/gdtools/releases/latest/download/gdtools.apk",
+  "changelog": "v2.6\n- 图鉴卡片改为竖排，图片放大，名称完整显示\n- 蛋组浏览按屏幕宽度自适应列数\n- 进化链中的加粗文本正常显示\n- APK 改由独立仓库 Releases 分发"
 }

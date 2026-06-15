@@ -75,7 +75,7 @@ fun PetDetailScreen(petId: Int, onClose: () -> Unit) {
             if (!pet.evolution.isNullOrEmpty()) {
                 item {
                     SectionCard("进化链") {
-                        Text(pet.evolution, fontSize = 14.sp, lineHeight = 22.sp, color = Color(0xFFD46B08))
+                        HtmlBoldText(pet.evolution, fontSize = 14.sp, lineHeight = 22.sp, color = Color(0xFFD46B08))
                     }
                 }
             }

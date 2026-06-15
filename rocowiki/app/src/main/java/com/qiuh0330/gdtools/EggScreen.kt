@@ -256,44 +256,47 @@ fun EggScreen(onShowPet: (Int) -> Unit) {
                         Text(if (expanded) "▲" else "▼", fontSize = 12.sp, color = TextLight)
                     }
                     if (expanded) {
-                        // 固定每行 3 个，宽度随屏幕自适应
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        // 按基准宽度算列数：屏幕越宽列数越多，单个不会被撑得过大
+                        BoxWithConstraints(
                             modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 14.dp),
                         ) {
-                            pets.chunked(3).forEach { rowPets ->
-                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    rowPets.forEach { p ->
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .clickable { onShowPet(p.id) },
-                                        ) {
-                                            PetImageFill(
-                                                p.id,
-                                                Modifier
-                                                    .fillMaxWidth()
-                                                    .aspectRatio(1f),
-                                            )
-                                            Spacer(Modifier.height(4.dp))
-                                            Text(
-                                                p.name,
-                                                fontSize = 12.sp,
-                                                lineHeight = 14.sp,
-                                                maxLines = 2,
-                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                            )
-                                            val attack = Repo.pets[p.id]?.attackTend ?: ""
-                                            if (attack.isNotEmpty()) {
-                                                Spacer(Modifier.height(2.dp))
-                                                Tag(attack, TagPinkBg, TagPinkFg, 10.sp)
+                            val baseWidth = 108.dp
+                            val columns = (maxWidth / baseWidth).toInt().coerceAtLeast(3)
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                pets.chunked(columns).forEach { rowPets ->
+                                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                        rowPets.forEach { p ->
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clickable { onShowPet(p.id) },
+                                            ) {
+                                                PetImageFill(
+                                                    p.id,
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .aspectRatio(1f),
+                                                )
+                                                Spacer(Modifier.height(4.dp))
+                                                Text(
+                                                    p.name,
+                                                    fontSize = 12.sp,
+                                                    lineHeight = 14.sp,
+                                                    maxLines = 2,
+                                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                                )
+                                                val attack = Repo.pets[p.id]?.attackTend ?: ""
+                                                if (attack.isNotEmpty()) {
+                                                    Spacer(Modifier.height(2.dp))
+                                                    Tag(attack, TagPinkBg, TagPinkFg, 10.sp)
+                                                }
                                             }
                                         }
-                                    }
-                                    // 末行不足 3 个时占位，保持等宽
-                                    repeat(3 - rowPets.size) {
-                                        Spacer(Modifier.weight(1f))
+                                        // 末行不足时占位，保持等宽
+                                        repeat(columns - rowPets.size) {
+                                            Spacer(Modifier.weight(1f))
+                                        }
                                     }
                                 }
                             }

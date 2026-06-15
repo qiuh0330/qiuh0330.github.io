@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -84,6 +85,7 @@ fun PokedexScreen(onPetCardClick: (Pet) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PetCard(pet: Pet, onClick: () -> Unit) {
     Card(
@@ -94,30 +96,38 @@ private fun PetCard(pet: Pet, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
     ) {
-        Column(Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (pet.hasImage) {
-                    PetImage(pet.id, 56.dp)
-                    Spacer(Modifier.width(10.dp))
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // 图片放大并居中
+            if (pet.hasImage) {
+                PetImage(pet.id, 100.dp)
+                Spacer(Modifier.height(8.dp))
+            }
+            // 名字、属性、时期放在图片下方，居中
+            Text(
+                pet.name,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                textAlign = TextAlign.Center,
+            )
+            if (pet.form.isNotEmpty()) {
+                Text("(${pet.form})", fontSize = 11.sp, color = Color(0xFF888888), textAlign = TextAlign.Center)
+            }
+            Spacer(Modifier.height(4.dp))
+            Row {
+                if (pet.attrs.isNotEmpty()) {
+                    Text(pet.attrs.joinToString(" / ") + "·", fontSize = 11.sp, color = TagOrangeFg)
                 }
-                Column {
-                    Text(pet.name, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                    if (pet.form.isNotEmpty()) {
-                        Text("(${pet.form})", fontSize = 11.sp, color = Color(0xFF888888))
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    Row {
-                        if (pet.attrs.isNotEmpty()) {
-                            Text(pet.attrs.joinToString(" / ") + "·", fontSize = 11.sp, color = TagOrangeFg)
-                        }
-                        Text(pet.stage, fontSize = 11.sp, color = Color(0xFF999999))
-                    }
-                }
+                Text(pet.stage, fontSize = 11.sp, color = Color(0xFF999999))
             }
             Spacer(Modifier.height(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 if (pet.starlight > 0) {
                     Tag("星光值：${pet.starlight}", TagYellowBg, TagYellowFg, 11.sp)
@@ -125,10 +135,9 @@ private fun PetCard(pet: Pet, onClick: () -> Unit) {
                 if (pet.attackTend.isNotEmpty()) {
                     Tag(pet.attackTend, TagPinkBg, TagPinkFg, 11.sp)
                 }
-            }
-            if (pet.eggGroups.isNotEmpty()) {
-                Spacer(Modifier.height(6.dp))
-                Tag("蛋组：${pet.eggGroups.joinToString(" / ")}", TagCyanBg, TagCyanFg, 11.sp)
+                if (pet.eggGroups.isNotEmpty()) {
+                    Tag("蛋组：${pet.eggGroups.joinToString(" / ")}", TagCyanBg, TagCyanFg, 11.sp)
+                }
             }
         }
     }

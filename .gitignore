@@ -11,3 +11,6 @@ lk_reconstruct.py
 # Python 缓存
 __pycache__/
 *.pyc
+
+# APK 不再放主仓库（改用单独的 gdtools 仓库 Releases 分发，避免撑大 git 历史）
+rocowiki/*.apk

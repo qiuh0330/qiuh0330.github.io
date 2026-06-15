@@ -179,6 +179,31 @@ fun TermText(
     }
 }
 
+/** 把 <strong> 渲染成粗体，其余标签剥离（用于进化链等含简单 HTML 的字段） */
+@Composable
+fun HtmlBoldText(
+    html: String,
+    fontSize: TextUnit = 13.sp,
+    color: Color = Color(0xFF333333),
+    lineHeight: TextUnit = fontSize * 1.6,
+) {
+    val annotated = remember(html) {
+        buildAnnotatedString {
+            val regex = Regex("<strong>(.*?)</strong>")
+            var pos = 0
+            for (m in regex.findAll(html)) {
+                append(unescapeHtml(html.substring(pos, m.range.first)))
+                withStyle(SpanStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)) {
+                    append(unescapeHtml(m.groupValues[1]))
+                }
+                pos = m.range.last + 1
+            }
+            append(unescapeHtml(html.substring(pos)))
+        }
+    }
+    Text(annotated, fontSize = fontSize, color = color, lineHeight = lineHeight)
+}
+
 private fun unescapeHtml(s: String): String = s
     .replace(Regex("<[^>]+>"), "")
     .replace("&lt;", "<")
