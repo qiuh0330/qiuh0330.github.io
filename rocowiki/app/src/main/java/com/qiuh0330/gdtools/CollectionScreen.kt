@@ -124,6 +124,7 @@ fun CollectionScreen(onShowPet: (Int) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CollectionPetCard(pet: PetOption, onShowPet: (Int) -> Unit) {
     val petData = Repo.pets[pet.id]
@@ -143,22 +144,22 @@ private fun CollectionPetCard(pet: PetOption, onShowPet: (Int) -> Unit) {
                 PetImage(pet.id, 40.dp, corner = 6.dp)
                 Spacer(Modifier.width(10.dp))
                 Column {
-                    Text(pet.name, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    // 名称、攻击倾向、蛋组放在同一行（窄屏自动换行）
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(pet.name, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        if (attack.isNotEmpty()) {
+                            Tag(attack, TagPinkBg, TagPinkFg, 10.sp)
+                        }
+                        if (eggs.isNotEmpty()) {
+                            Tag(eggs, TagCyanBg, TagCyanFg, 10.sp)
+                        }
+                    }
                     // 形态放在名称下面一行
                     if (form.isNotEmpty()) {
                         Text("(${form})", fontSize = 12.sp, color = Color(0xFF888888))
-                    }
-                    if (attack.isNotEmpty() || eggs.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (attack.isNotEmpty()) {
-                                Tag(attack, TagPinkBg, TagPinkFg, 10.sp)
-                            }
-                            if (eggs.isNotEmpty()) {
-                                Spacer(Modifier.width(6.dp))
-                                Tag(eggs, TagCyanBg, TagCyanFg, 10.sp)
-                            }
-                        }
                     }
                 }
             }

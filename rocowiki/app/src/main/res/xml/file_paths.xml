@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <files-path name="apk" path="apk/" />
+    <!-- DownloadManager 后台下载的更新包存这里 -->
+    <external-files-path name="ext_download" path="Download/" />
 </paths>

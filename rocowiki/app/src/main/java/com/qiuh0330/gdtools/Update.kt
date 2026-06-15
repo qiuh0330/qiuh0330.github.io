@@ -1,33 +1,30 @@
 package com.qiuh0330.gdtools
 
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.Uri
+import android.os.Environment
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
-import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
 private const val VERSION_URL = "https://qiuh0330.github.io/rocowiki/version.json"
+private const val APK_FILE_NAME = "gdtools-update.apk"
 
 data class UpdateInfo(
     val versionCode: Long,
@@ -66,33 +63,58 @@ fun fetchUpdateInfo(): UpdateInfo? {
     }
 }
 
-/** 下载 APK 到应用私有目录，onProgress 回调 0~1 进度，失败返回 null */
-private fun downloadApk(context: Context, apkUrl: String, onProgress: (Float) -> Unit): File? {
-    return try {
-        val conn = URL(apkUrl).openConnection() as HttpURLConnection
-        conn.connectTimeout = 10000
-        conn.readTimeout = 60000
-        val total = conn.contentLength
-        val dir = File(context.filesDir, "apk").apply { mkdirs() }
-        val file = File(dir, "update.apk")
-        conn.inputStream.use { input ->
-            FileOutputStream(file).use { out ->
-                val buf = ByteArray(64 * 1024)
-                var done = 0L
-                while (true) {
-                    val read = input.read(buf)
-                    if (read == -1) break
-                    out.write(buf, 0, read)
-                    done += read
-                    if (total > 0) onProgress(done.toFloat() / total)
+/**
+ * 用系统 DownloadManager 在后台下载更新包：
+ * 下载过程显示在系统通知栏，app 可正常使用/退到后台；下载完成后自动拉起安装器。
+ */
+fun startBackgroundUpdate(context: Context, info: UpdateInfo) {
+    val appCtx = context.applicationContext
+    val dm = appCtx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+
+    // 清掉上一次可能残留的包，避免出现 gdtools-update-1.apk
+    File(appCtx.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), APK_FILE_NAME).delete()
+
+    val request = DownloadManager.Request(Uri.parse(info.apkUrl)).apply {
+        setTitle("果冻工具 v${info.versionName}")
+        setDescription("正在后台下载更新")
+        setMimeType("application/vnd.android.package-archive")
+        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        setDestinationInExternalFilesDir(appCtx, Environment.DIRECTORY_DOWNLOADS, APK_FILE_NAME)
+    }
+    val downloadId = dm.enqueue(request)
+
+    // 下载完成广播：核对 id → 成功则拉起安装
+    val receiver = object : BroadcastReceiver() {
+        override fun onReceive(c: Context, intent: Intent) {
+            val doneId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
+            if (doneId != downloadId) return
+            try {
+                appCtx.unregisterReceiver(this)
+            } catch (_: Exception) {
+            }
+            val status = dm.query(DownloadManager.Query().setFilterById(downloadId)).use { cur ->
+                if (cur.moveToFirst()) {
+                    cur.getInt(cur.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+                } else {
+                    DownloadManager.STATUS_FAILED
                 }
             }
+            if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                val file = File(appCtx.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), APK_FILE_NAME)
+                installApk(appCtx, file)
+            } else {
+                Toast.makeText(appCtx, "更新下载失败，请稍后重试", Toast.LENGTH_LONG).show()
+            }
         }
-        conn.disconnect()
-        file
-    } catch (e: Exception) {
-        null
     }
+    ContextCompat.registerReceiver(
+        appCtx,
+        receiver,
+        IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+        ContextCompat.RECEIVER_EXPORTED,
+    )
+
+    Toast.makeText(context, "已在后台开始下载，完成后会自动提示安装", Toast.LENGTH_LONG).show()
 }
 
 /** 通过 FileProvider 拉起系统安装器（首次会引导授予「安装未知应用」权限） */
@@ -109,16 +131,12 @@ private fun installApk(context: Context, file: File) {
     }
 }
 
-/** 新版本提示框：应用内下载（带进度）后拉起安装 */
+/** 新版本提示框：点「立即更新」后转入后台下载，对话框随即关闭 */
 @Composable
 fun UpdateDialog(info: UpdateInfo, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var progress by remember { mutableStateOf<Float?>(null) }
-    var failed by remember { mutableStateOf(false) }
-
     AlertDialog(
-        onDismissRequest = { if (progress == null) onDismiss() },
+        onDismissRequest = onDismiss,
         title = { Text("发现新版本 v${info.versionName}") },
         text = {
             Column {
@@ -127,46 +145,16 @@ fun UpdateDialog(info: UpdateInfo, onDismiss: () -> Unit) {
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                 )
-                progress?.let { p ->
-                    Spacer(Modifier.height(12.dp))
-                    LinearProgressIndicator(
-                        progress = { p.coerceIn(0f, 1f) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text("下载中 ${(p * 100).toInt()}%", fontSize = 12.sp, color = TextLight)
-                }
-                if (failed) {
-                    Spacer(Modifier.height(8.dp))
-                    Text("下载失败，请检查网络后重试", fontSize = 12.sp, color = BadRed)
-                }
             }
         },
         confirmButton = {
-            TextButton(
-                enabled = progress == null,
-                onClick = {
-                    failed = false
-                    progress = 0f
-                    scope.launch {
-                        val file = withContext(Dispatchers.IO) {
-                            downloadApk(context, info.apkUrl) { p -> progress = p }
-                        }
-                        progress = null
-                        if (file != null) {
-                            installApk(context, file)
-                            onDismiss()
-                        } else {
-                            failed = true
-                        }
-                    }
-                },
-            ) { Text(if (progress == null) "立即更新" else "下载中…") }
+            TextButton(onClick = {
+                startBackgroundUpdate(context, info)
+                onDismiss()
+            }) { Text("后台下载") }
         },
         dismissButton = {
-            if (progress == null) {
-                TextButton(onClick = onDismiss) { Text("取消") }
-            }
+            TextButton(onClick = onDismiss) { Text("取消") }
         },
     )
 }
