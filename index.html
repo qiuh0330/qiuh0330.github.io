@@ -90,6 +90,26 @@
     font-size: 20px;
     color: var(--primary);
   }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    flex: 1;
+    min-width: 130px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-ghost { background: #eef5ff; color: var(--primary); }
   .footer {
     margin-top: 32px;
     font-size: 13px;
@@ -111,12 +131,19 @@
   <div class="name">qiuh0330</div>
   <div class="bio">做点有意思的小工具</div>
 
-  <a href="./roco/index.html" class="link-card">
-    <div class="link-card-icon">🐾</div>
-    <div class="link-card-title">《洛克王国·世界》精灵图鉴</div>
-    <div class="link-card-desc">精灵图鉴 ·图鉴任务 ·精灵蛋组 ·收集管理</div>
-    <div class="link-card-arrow">→</div>
-  </a>
+  <div class="link-card" style="text-align:left;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="link-card-icon" style="margin:0;">🍮</div>
+      <div>
+        <div class="link-card-title" style="margin:0;">果冻工具</div>
+        <div class="link-card-desc">《洛克王国·世界》精灵图鉴 · 图鉴任务 · 精灵蛋组 · 收集管理</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <a href="./roco/index.html" class="btn btn-primary">🌐 在线使用</a>
+      <a href="https://github.com/qiuh0330/gdtools/releases/latest/download/gdtools.apk" class="btn btn-ghost">📱 下载安卓 App</a>
+    </div>
+  </div>
 
   <div class="footer">
     <a href="https://github.com/qiuh0330">GitHub</a>
