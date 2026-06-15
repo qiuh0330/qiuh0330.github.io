@@ -130,7 +130,7 @@ private fun PetCard(pet: Pet, onClick: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 if (pet.starlight > 0) {
-                    Tag("星光值：${pet.starlight}", TagYellowBg, TagYellowFg, 11.sp)
+                    Tag("星光${pet.starlight}", TagYellowBg, TagYellowFg, 11.sp)
                 }
                 if (pet.attackTend.isNotEmpty()) {
                     Tag(pet.attackTend, TagPinkBg, TagPinkFg, 11.sp)

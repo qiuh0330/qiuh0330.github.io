@@ -142,17 +142,24 @@ private fun CollectionPetCard(pet: PetOption, onShowPet: (Int) -> Unit) {
             ) {
                 PetImage(pet.id, 40.dp, corner = 6.dp)
                 Spacer(Modifier.width(10.dp))
-                Text(pet.name, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                if (form.isNotEmpty()) {
-                    Text(" (${form})", fontSize = 12.sp, color = Color(0xFF888888))
-                }
-                if (attack.isNotEmpty()) {
-                    Spacer(Modifier.width(6.dp))
-                    Tag(attack, TagPinkBg, TagPinkFg, 10.sp)
-                }
-                if (eggs.isNotEmpty()) {
-                    Spacer(Modifier.width(6.dp))
-                    Tag(eggs, TagCyanBg, TagCyanFg, 10.sp)
+                Column {
+                    Text(pet.name, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    // 形态放在名称下面一行
+                    if (form.isNotEmpty()) {
+                        Text("(${form})", fontSize = 12.sp, color = Color(0xFF888888))
+                    }
+                    if (attack.isNotEmpty() || eggs.isNotEmpty()) {
+                        Spacer(Modifier.height(2.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (attack.isNotEmpty()) {
+                                Tag(attack, TagPinkBg, TagPinkFg, 10.sp)
+                            }
+                            if (eggs.isNotEmpty()) {
+                                Spacer(Modifier.width(6.dp))
+                                Tag(eggs, TagCyanBg, TagCyanFg, 10.sp)
+                            }
+                        }
+                    }
                 }
             }
             Spacer(Modifier.height(4.dp))

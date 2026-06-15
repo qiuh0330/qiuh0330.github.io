@@ -1,6 +1,6 @@
 {
-  "versionCode": 8,
-  "versionName": "2.6",
+  "versionCode": 9,
+  "versionName": "2.7",
   "apkUrl": "https://github.com/qiuh0330/gdtools/releases/latest/download/gdtools.apk",
-  "changelog": "v2.6\n- 图鉴卡片改为竖排，图片放大，名称完整显示\n- 蛋组浏览按屏幕宽度自适应列数\n- 进化链中的加粗文本正常显示\n- APK 改由独立仓库 Releases 分发"
+  "changelog": "v2.7\n- 收集情况：形态显示在名称下一行\n- 图鉴卡片星光值标签简化为「星光XX」\n- 修复进化条件中采集矿物名称无法显示的问题"
 }
