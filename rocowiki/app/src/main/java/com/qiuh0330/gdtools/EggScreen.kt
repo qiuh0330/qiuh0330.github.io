@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -20,7 +21,7 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun EggScreen(onShowPet: (Int) -> Unit) {
+fun EggScreen(onShowPet: (Int) -> Unit, listState: LazyListState) {
     var heightInput by rememberSaveable { mutableStateOf("") }
     var weightInput by rememberSaveable { mutableStateOf("") }
     var eggResult by remember { mutableStateOf<List<EggMatch>?>(null) }
@@ -45,7 +46,9 @@ fun EggScreen(onShowPet: (Int) -> Unit) {
         eggResult = Repo.searchEgg(h, w)
     }
 
+    Box(Modifier.fillMaxSize()) {
     LazyColumn(
+        state = listState,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize(),
@@ -306,6 +309,8 @@ fun EggScreen(onShowPet: (Int) -> Unit) {
             }
         }
     }
+    LazyListScrollbar(listState, Modifier.align(Alignment.CenterEnd).padding(end = 2.dp))
+    } // Box
 }
 
 @Composable

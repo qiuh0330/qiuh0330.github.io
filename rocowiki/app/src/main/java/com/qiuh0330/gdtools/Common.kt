@@ -10,11 +10,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -314,6 +317,68 @@ fun FilterDropdown(
                     onClick = { onSelect(opt); expanded = false },
                 )
             }
+        }
+    }
+}
+
+/** LazyColumn 右侧滚动条 */
+@Composable
+fun LazyListScrollbar(state: LazyListState, modifier: Modifier = Modifier) {
+    val thumbFraction by remember(state) {
+        derivedStateOf {
+            val total = state.layoutInfo.totalItemsCount
+            val visible = state.layoutInfo.visibleItemsInfo.size
+            if (total <= 0 || visible >= total) 1f else visible.toFloat() / total
+        }
+    }
+    val scrollFraction by remember(state) {
+        derivedStateOf {
+            val total = state.layoutInfo.totalItemsCount
+            val visible = state.layoutInfo.visibleItemsInfo.size
+            val max = (total - visible).coerceAtLeast(1).toFloat()
+            (state.firstVisibleItemIndex / max).coerceIn(0f, 1f)
+        }
+    }
+    if (thumbFraction < 1f) {
+        BoxWithConstraints(modifier.width(4.dp).fillMaxHeight()) {
+            val thumbH = maxHeight * thumbFraction
+            Box(
+                Modifier
+                    .size(4.dp, thumbH)
+                    .offset(y = (maxHeight - thumbH) * scrollFraction)
+                    .background(Color(0xFFBBBBBB), RoundedCornerShape(2.dp))
+            )
+        }
+    }
+}
+
+/** LazyVerticalGrid 右侧滚动条 */
+@Composable
+fun LazyGridScrollbar(state: LazyGridState, modifier: Modifier = Modifier) {
+    val thumbFraction by remember(state) {
+        derivedStateOf {
+            val total = state.layoutInfo.totalItemsCount
+            val visible = state.layoutInfo.visibleItemsInfo.size
+            if (total <= 0 || visible >= total) 1f else visible.toFloat() / total
+        }
+    }
+    val scrollFraction by remember(state) {
+        derivedStateOf {
+            val total = state.layoutInfo.totalItemsCount
+            val visible = state.layoutInfo.visibleItemsInfo.size
+            val max = (total - visible).coerceAtLeast(1).toFloat()
+            (state.firstVisibleItemIndex / max).coerceIn(0f, 1f)
+        }
+    }
+    if (thumbFraction < 1f) {
+        BoxWithConstraints(modifier.width(4.dp).fillMaxHeight()) {
+            val thumbH = maxHeight * thumbFraction
+            Box(
+                Modifier
+                    .size(4.dp, thumbH)
+                    .offset(y = (maxHeight - thumbH) * scrollFraction)
+                    .background(Color(0xFFBBBBBB), RoundedCornerShape(2.dp))
+            )
         }
     }
 }

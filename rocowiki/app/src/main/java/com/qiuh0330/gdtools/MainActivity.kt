@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.Home
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -134,6 +137,12 @@ fun RocoApp() {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var detailPetId by rememberSaveable { mutableStateOf<Int?>(null) }
 
+    val pokedexGridState = remember { LazyGridState() }
+    val tasksListState = remember { LazyListState() }
+    val eggListState = remember { LazyListState() }
+    val collectionListState = remember { LazyListState() }
+    val scope = rememberCoroutineScope()
+
     // 图鉴卡片点击：有进化分支时提示，否则跳到最终形态
     val onPetCardClick: (Pet) -> Unit = { pet ->
         if (pet.finalFormIds.size > 1) {
@@ -152,7 +161,20 @@ fun RocoApp() {
                     val tint = if (tab == index) Color.Black else Color(0xFF999999)
                     NavigationBarItem(
                         selected = tab == index,
-                        onClick = { tab = index },
+                        onClick = {
+                            if (tab == index) {
+                                scope.launch {
+                                    when (index) {
+                                        0 -> pokedexGridState.animateScrollToItem(0)
+                                        1 -> tasksListState.animateScrollToItem(0)
+                                        2 -> eggListState.animateScrollToItem(0)
+                                        3 -> collectionListState.animateScrollToItem(0)
+                                    }
+                                }
+                            } else {
+                                tab = index
+                            }
+                        },
                         icon = { icon(tint) },
                         label = {
                             Text(
@@ -176,10 +198,10 @@ fun RocoApp() {
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
             when (tab) {
-                0 -> PokedexScreen(onPetCardClick)
-                1 -> TasksScreen()
-                2 -> EggScreen(onShowPet)
-                3 -> CollectionScreen(onShowPet)
+                0 -> PokedexScreen(onPetCardClick, pokedexGridState)
+                1 -> TasksScreen(tasksListState)
+                2 -> EggScreen(onShowPet, eggListState)
+                3 -> CollectionScreen(onShowPet, collectionListState)
                 4 -> SettingsScreen()
             }
         }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
@@ -23,13 +24,14 @@ import androidx.compose.ui.unit.sp
 private val STAGES = listOf("初级", "中级", "高级", "首领")
 
 @Composable
-fun PokedexScreen(onPetCardClick: (Pet) -> Unit) {
+fun PokedexScreen(onPetCardClick: (Pet) -> Unit, gridState: LazyGridState) {
     var search by rememberSaveable { mutableStateOf("") }
     var stage by rememberSaveable { mutableStateOf("") }
     var attr by rememberSaveable { mutableStateOf("") }
     var egg by rememberSaveable { mutableStateOf("") }
+    var shiny by rememberSaveable { mutableStateOf(false) }
 
-    val pets = remember(search, stage, attr, egg) {
+    val pets = remember(search, stage, attr, egg, shiny) {
         val q = search.trim().lowercase()
         Repo.petsSorted.filter { p ->
             if (q.isNotEmpty() && !p.name.contains(q) &&
@@ -38,6 +40,7 @@ fun PokedexScreen(onPetCardClick: (Pet) -> Unit) {
             if (stage.isNotEmpty() && p.stage != stage) return@filter false
             if (attr.isNotEmpty() && !p.attrs.contains(attr)) return@filter false
             if (egg.isNotEmpty() && !p.eggGroups.contains(egg)) return@filter false
+            if (shiny && !p.hasShiny) return@filter false
             true
         }
     }
@@ -64,22 +67,29 @@ fun PokedexScreen(onPetCardClick: (Pet) -> Unit) {
                 FilterDropdown("全部时期", STAGES, stage) { stage = it }
                 FilterDropdown("全部属性", Repo.allAttrs, attr) { attr = it }
                 FilterDropdown("全部蛋组", Repo.allEggGroupsOfPets, egg) { egg = it }
+                FilterDropdown("异色", listOf("有异色"), if (shiny) "有异色" else "") {
+                    shiny = it == "有异色"
+                }
             }
         }
 
         if (pets.isEmpty()) {
             EmptyState("🔍", "没有找到匹配的精灵")
         } else {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 165.dp),
-                contentPadding = PaddingValues(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                items(pets, key = { it.id }) { pet ->
-                    PetCard(pet, onClick = { onPetCardClick(pet) })
+            Box(Modifier.fillMaxSize()) {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 165.dp),
+                    state = gridState,
+                    contentPadding = PaddingValues(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    items(pets, key = { it.id }) { pet ->
+                        PetCard(pet, showShiny = shiny, onClick = { onPetCardClick(pet) })
+                    }
                 }
+                LazyGridScrollbar(gridState, Modifier.align(Alignment.CenterEnd).padding(end = 2.dp))
             }
         }
     }
@@ -87,7 +97,7 @@ fun PokedexScreen(onPetCardClick: (Pet) -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PetCard(pet: Pet, onClick: () -> Unit) {
+private fun PetCard(pet: Pet, showShiny: Boolean = false, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -100,12 +110,10 @@ private fun PetCard(pet: Pet, onClick: () -> Unit) {
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // 图片放大并居中
             if (pet.hasImage) {
-                PetImage(pet.id, 100.dp)
+                PetImage(pet.id, 100.dp, shiny = showShiny && pet.hasShiny)
                 Spacer(Modifier.height(8.dp))
             }
-            // 名字、属性、时期放在图片下方，居中
             Text(
                 pet.name,
                 fontSize = 16.sp,
@@ -131,6 +139,9 @@ private fun PetCard(pet: Pet, onClick: () -> Unit) {
             ) {
                 if (pet.starlight > 0) {
                     Tag("星光${pet.starlight}", TagYellowBg, TagYellowFg, 11.sp)
+                }
+                if (pet.hasShiny) {
+                    Tag("✨异色", Color(0xFFF9F0FF), Color(0xFF9254DE), 11.sp)
                 }
                 if (pet.attackTend.isNotEmpty()) {
                     Tag(pet.attackTend, TagPinkBg, TagPinkFg, 11.sp)

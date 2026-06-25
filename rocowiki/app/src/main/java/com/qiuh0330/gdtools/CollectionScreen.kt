@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -24,7 +25,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun CollectionScreen(onShowPet: (Int) -> Unit) {
+fun CollectionScreen(onShowPet: (Int) -> Unit, listState: LazyListState) {
     val context = LocalContext.current
     var showResetConfirm by remember { mutableStateOf(false) }
 
@@ -95,14 +96,18 @@ fun CollectionScreen(onShowPet: (Int) -> Unit) {
         if (pets.isEmpty()) {
             EmptyState("🔍", "没有找到匹配的精灵")
         } else {
-            LazyColumn(
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                items(pets, key = { it.id }) { pet ->
-                    CollectionPetCard(pet, onShowPet)
+            Box(Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    items(pets, key = { it.id }) { pet ->
+                        CollectionPetCard(pet, onShowPet)
+                    }
                 }
+                LazyListScrollbar(listState, Modifier.align(Alignment.CenterEnd).padding(end = 2.dp))
             }
         }
     }

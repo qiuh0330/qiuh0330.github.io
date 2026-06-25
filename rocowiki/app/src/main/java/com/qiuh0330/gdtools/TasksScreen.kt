@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -25,7 +26,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun TasksScreen() {
+fun TasksScreen(listState: LazyListState) {
     val context = LocalContext.current
     var search by rememberSaveable { mutableStateOf("") }
     var filter by rememberSaveable { mutableStateOf("all") }  // all / undone / done
@@ -100,18 +101,22 @@ fun TasksScreen() {
         if (handbooks.isEmpty()) {
             EmptyState("📝", "没有找到匹配的任务")
         } else {
-            LazyColumn(
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                items(handbooks, key = { it.bookId }) { hb ->
-                    HandbookCard(
-                        hb = hb,
-                        forceContext = search.isNotEmpty() || filter != "all",
-                        expandOverride = expandOverride,
-                    )
+            Box(Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    items(handbooks, key = { it.bookId }) { hb ->
+                        HandbookCard(
+                            hb = hb,
+                            forceContext = search.isNotEmpty() || filter != "all",
+                            expandOverride = expandOverride,
+                        )
+                    }
                 }
+                LazyListScrollbar(listState, Modifier.align(Alignment.CenterEnd).padding(end = 2.dp))
             }
         }
     }

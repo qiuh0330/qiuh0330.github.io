@@ -12,8 +12,8 @@ android {
         applicationId = "com.qiuh0330.gdtools"
         minSdk = 24
         targetSdk = 34
-        versionCode = 10
-        versionName = "2.8"
+        versionCode = 11
+        versionName = "2.9"
     }
 
     buildTypes {

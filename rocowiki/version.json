@@ -1,6 +1,6 @@
 {
-  "versionCode": 10,
-  "versionName": "2.8",
+  "versionCode": 11,
+  "versionName": "2.9",
   "apkUrl": "https://github.com/qiuh0330/gdtools/releases/latest/download/gdtools.apk",
-  "changelog": "v2.8\n- 更新改为后台下载（系统通知栏显示进度，可继续使用 app）\n- 收集情况：攻击倾向、蛋组与名称同一行显示"
+  "changelog": "v2.9\n- 精灵图鉴新增异色筛选（有异色图片的精灵），筛选时卡片显示异色图\n- 四个主页加上右侧滚动条\n- 切换标签页再切回来保留滚动位置\n- 重复点击底部标签图标可回到顶部"
 }
