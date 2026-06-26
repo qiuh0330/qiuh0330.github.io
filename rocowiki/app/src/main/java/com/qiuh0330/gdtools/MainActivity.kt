@@ -216,7 +216,7 @@ fun RocoApp() {
     // 启动时静默检查更新，有新版本才提示
     var autoUpdate by remember { mutableStateOf<UpdateInfo?>(null) }
     LaunchedEffect(Unit) {
-        val info = withContext(Dispatchers.IO) { fetchUpdateInfo() }
+        val info = withContext(Dispatchers.IO) { fetchUpdateInfo() }.getOrNull()
         if (info != null && info.versionCode > currentVersionCode(context)) {
             autoUpdate = info
         }

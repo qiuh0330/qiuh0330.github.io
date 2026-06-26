@@ -1,6 +1,6 @@
 {
-  "versionCode": 12,
-  "versionName": "2.10",
+  "versionCode": 13,
+  "versionName": "2.11",
   "apkUrl": "https://github.com/qiuh0330/gdtools/releases/latest/download/gdtools.apk",
-  "changelog": "v2.10\n- 图鉴筛选按钮改为简短标签（时期/属性/蛋组/异色），完整选项放进下拉内\n- 精灵卡片的异色标签去掉特殊符号，仅显示"异色""
+  "changelog": "v2.11\n- 检查更新失败时显示具体错误信息，便于排查原因"
 }

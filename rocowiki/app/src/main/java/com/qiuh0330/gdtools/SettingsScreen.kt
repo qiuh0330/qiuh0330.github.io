@@ -47,13 +47,18 @@ fun SettingsScreen() {
                         scope.launch {
                             val result = withContext(Dispatchers.IO) { fetchUpdateInfo() }
                             checking = false
-                            when {
-                                result == null ->
-                                    Toast.makeText(context, "检查失败，请检查网络后重试", Toast.LENGTH_LONG).show()
-                                result.versionCode <= versionCode ->
-                                    Toast.makeText(context, "已是最新版本 v$versionName", Toast.LENGTH_SHORT).show()
-                                else -> update = result
-                            }
+                            result.fold(
+                                onSuccess = { info ->
+                                    if (info.versionCode <= versionCode)
+                                        Toast.makeText(context, "已是最新版本 v$versionName", Toast.LENGTH_SHORT).show()
+                                    else
+                                        update = info
+                                },
+                                onFailure = { e ->
+                                    val msg = e.message?.take(120) ?: "未知错误"
+                                    Toast.makeText(context, "检查失败：$msg", Toast.LENGTH_LONG).show()
+                                },
+                            )
                         }
                     }
                     .padding(16.dp),

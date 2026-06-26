@@ -41,25 +41,31 @@ fun currentVersionCode(context: Context): Long {
 fun currentVersionName(context: Context): String =
     context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "?"
 
-/** 拉取站点上的 version.json，失败返回 null */
-fun fetchUpdateInfo(): UpdateInfo? {
+/** 拉取站点上的 version.json，返回 Result（失败时携带具体异常信息） */
+fun fetchUpdateInfo(): Result<UpdateInfo> {
     return try {
         // 加时间戳绕过 CDN 缓存
         val url = URL("$VERSION_URL?t=${System.currentTimeMillis()}")
         val conn = url.openConnection() as HttpURLConnection
-        conn.connectTimeout = 8000
-        conn.readTimeout = 8000
+        conn.connectTimeout = 10000
+        conn.readTimeout = 10000
+        conn.instanceFollowRedirects = true
+        val code = conn.responseCode
+        if (code != HttpURLConnection.HTTP_OK) {
+            conn.disconnect()
+            return Result.failure(Exception("HTTP $code"))
+        }
         val text = conn.inputStream.bufferedReader().use { it.readText() }
         conn.disconnect()
         val json = JSONObject(text)
-        UpdateInfo(
+        Result.success(UpdateInfo(
             versionCode = json.optLong("versionCode"),
             versionName = json.optString("versionName"),
             apkUrl = json.optString("apkUrl"),
             changelog = json.optString("changelog"),
-        )
+        ))
     } catch (e: Exception) {
-        null
+        Result.failure(e)
     }
 }
 
