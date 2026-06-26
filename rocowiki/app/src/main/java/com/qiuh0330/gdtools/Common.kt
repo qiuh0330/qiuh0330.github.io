@@ -284,12 +284,16 @@ fun SmallSearchField(
     )
 }
 
-/** 下拉筛选按钮 */
+/** 下拉筛选按钮
+ * @param label     按钮标签（未选中时显示）
+ * @param clearLabel 下拉第一项"清除"选项的文字，默认与 label 相同
+ */
 @Composable
 fun FilterDropdown(
     label: String,
     options: List<String>,
     selected: String,
+    clearLabel: String = label,
     onSelect: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -308,7 +312,7 @@ fun FilterDropdown(
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
-                text = { Text(label, fontSize = 14.sp) },
+                text = { Text(clearLabel, fontSize = 14.sp) },
                 onClick = { onSelect(""); expanded = false },
             )
             options.forEach { opt ->

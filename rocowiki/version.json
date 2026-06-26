@@ -1,6 +1,6 @@
 {
-  "versionCode": 11,
-  "versionName": "2.9",
+  "versionCode": 12,
+  "versionName": "2.10",
   "apkUrl": "https://github.com/qiuh0330/gdtools/releases/latest/download/gdtools.apk",
-  "changelog": "v2.9\n- 精灵图鉴新增异色筛选（有异色图片的精灵），筛选时卡片显示异色图\n- 四个主页加上右侧滚动条\n- 切换标签页再切回来保留滚动位置\n- 重复点击底部标签图标可回到顶部"
+  "changelog": "v2.10\n- 图鉴筛选按钮改为简短标签（时期/属性/蛋组/异色），完整选项放进下拉内\n- 精灵卡片的异色标签去掉特殊符号，仅显示"异色""
 }

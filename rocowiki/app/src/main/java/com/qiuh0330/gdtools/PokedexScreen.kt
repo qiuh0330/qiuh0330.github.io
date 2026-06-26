@@ -64,10 +64,10 @@ fun PokedexScreen(onPetCardClick: (Pet) -> Unit, gridState: LazyGridState) {
                 Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                FilterDropdown("全部时期", STAGES, stage) { stage = it }
-                FilterDropdown("全部属性", Repo.allAttrs, attr) { attr = it }
-                FilterDropdown("全部蛋组", Repo.allEggGroupsOfPets, egg) { egg = it }
-                FilterDropdown("异色", listOf("有异色"), if (shiny) "有异色" else "") {
+                FilterDropdown("时期", STAGES, stage, "全部时期") { stage = it }
+                FilterDropdown("属性", Repo.allAttrs, attr, "全部属性") { attr = it }
+                FilterDropdown("蛋组", Repo.allEggGroupsOfPets, egg, "全部蛋组") { egg = it }
+                FilterDropdown("异色", listOf("有异色"), if (shiny) "有异色" else "", "全部") {
                     shiny = it == "有异色"
                 }
             }
@@ -141,7 +141,7 @@ private fun PetCard(pet: Pet, showShiny: Boolean = false, onClick: () -> Unit) {
                     Tag("星光${pet.starlight}", TagYellowBg, TagYellowFg, 11.sp)
                 }
                 if (pet.hasShiny) {
-                    Tag("✨异色", Color(0xFFF9F0FF), Color(0xFF9254DE), 11.sp)
+                    Tag("异色", Color(0xFFF9F0FF), Color(0xFF9254DE), 11.sp)
                 }
                 if (pet.attackTend.isNotEmpty()) {
                     Tag(pet.attackTend, TagPinkBg, TagPinkFg, 11.sp)
